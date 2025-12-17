@@ -1,0 +1,70 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Duration",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, method, route, status))",
+          "legendFormat": "{{method}} {{route}} {{status}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "WS Event Duration",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ws_event_duration_seconds_bucket[1m])) by (le, event, direction, result))",
+          "legendFormat": "{{event}} {{direction}} {{result}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Count",
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_seconds_count[1m])) by (method, route, status)",
+          "legendFormat": "{{method}} {{route}} {{status}}",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "WS Event Count",
+      "targets": [
+        {
+          "expr": "sum(rate(ws_event_duration_seconds_count[1m])) by (event, direction, result)",
+          "legendFormat": "{{event}} {{direction}} {{result}}",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 6 }
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": ["monitoring"],
+  "templating": {"list": []},
+  "time": {"from": "now-5m","to": "now"},
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Request Dashboard",
+  "uid": "monitoring-metrics"
+}

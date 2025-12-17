@@ -1,0 +1,12 @@
+groups:
+  - name: monitoring.rules
+    rules:
+      - alert: SlowRequest
+        expr: histogram_quantile(0.5, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, method, route, status)) > 0.6
+        for: 1m
+        labels:
+          severity: page
+          team: devops
+        annotations:
+          summary: "Slow requests detected on route {{ $labels.route }}"
+          description: "50th percentile request latency is > 0.6s for route {{ $labels.route }} (method={{ $labels.method }})"
