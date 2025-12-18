@@ -30,14 +30,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Demo endpoints
-app.get('/', (req, res) => {
-  // Simulate work
-  const delay = Math.random() * 500;
-  setTimeout(() => res.send('Hello World'), delay);
-});
-
-app.get('/slow', (req, res) => {
+app.get('/api/slow', (req, res) => {
   const delay = 500 + Math.random() * 1000;
   setTimeout(() => res.send('Slow response'), delay);
 });

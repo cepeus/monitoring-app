@@ -1,5 +1,11 @@
 version: '3.8'
 services:
+
+  nginx_exporter:
+    image: nginx/nginx-prometheus-exporter:0.11.0
+    container_name: monitoring_nginx_exporter
+    command: ["-nginx.scrape-uri", "${NGINX_SCRAPE_URL}"]
+
   app:
     build: .
     container_name: monitoring_app
@@ -15,15 +21,18 @@ services:
       - ./alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
     ports:
       - "9090:9090"
+    restart: unless-stopped
     depends_on:
       - app
       - alertmanager
+      - nginx_exporter
 
   alertmanager:
     image: prom/alertmanager:v0.25.0
     container_name: monitoring_alertmanager
     ports:
       - "9093:9093"
+    restart: unless-stopped
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/config.yml:ro
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
@@ -35,6 +44,7 @@ services:
     container_name: monitoring_am_telegram
     ports:
       - "9094:9094"
+    restart: unless-stopped
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
@@ -44,6 +54,7 @@ services:
     container_name: monitoring_grafana
     ports:
       - "3001:3000"
+    restart: unless-stopped
     volumes:
       - grafana-storage:/var/lib/grafana
       - ./grafana/provisioning:/etc/grafana/provisioning:ro

@@ -1,0 +1,148 @@
+{
+  "title": "NGINX / HTTP Service — Overview",
+  "schemaVersion": 36,
+  "version": 1,
+  "refresh": "5s",
+  "time": { "from": "now-1h", "to": "now" },
+  "style": "dark",
+  "tags": ["nginx", "prometheus"],
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "RPS (total)",
+      "targets": [
+        {
+          "expr": "sum(rate(nginx_http_requests_total[1m]))",
+          "legendFormat": "rps"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (%) — 5xx",
+      "targets": [
+        {
+          "expr": "100 * sum(rate(nginx_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(nginx_http_requests_total[5m]))",
+          "legendFormat": "5xx %"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95 (overall)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "p95"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Connections",
+      "targets": [
+        {
+          "expr": "nginx_connections_active",
+          "legendFormat": "active"
+        }
+      ],
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "RPS by Endpoint (Top 10)",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (route) (rate(http_request_duration_seconds_count[1m])))",
+          "legendFormat": "{{route}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 5, "w": 12, "h": 7 }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests by Status Code (stacked)",
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(nginx_http_requests_total[1m]))",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "options": { "stacking": { "mode": "normal" } },
+      "gridPos": { "x": 12, "y": 5, "w": 12, "h": 7 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95 by Endpoint (Top 5)",
+      "targets": [
+        {
+          "expr": "topk(5, histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket[5m]))))",
+          "legendFormat": "{{route}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 7 }
+    },
+    {
+      "type": "heatmap",
+      "title": "Latency Heatmap",
+      "targets": [
+        {
+          "expr": "sum by (le) (rate(http_request_duration_seconds_bucket[5m]))"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 7 }
+    },
+    {
+      "type": "timeseries",
+      "title": "5xx Errors by Endpoint (Top 5)",
+      "targets": [
+        {
+          "expr": "topk(5, sum by (route) (rate(nginx_http_requests_total{status=~\"5..\"}[5m])))",
+          "legendFormat": "{{route}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 19, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "4xx vs 5xx (%)",
+      "targets": [
+        {
+          "expr": "100 * sum(rate(nginx_http_requests_total{status=~\"4..\"}[5m])) / sum(rate(nginx_http_requests_total[5m]))",
+          "legendFormat": "4xx %"
+        },
+        {
+          "expr": "100 * sum(rate(nginx_http_requests_total{status=~\"5..\"}[5m])) / sum(rate(nginx_http_requests_total[5m]))",
+          "legendFormat": "5xx %"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 19, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "NGINX Connections (reading / writing / waiting)",
+      "targets": [
+        { "expr": "nginx_connections_reading", "legendFormat": "reading" },
+        { "expr": "nginx_connections_writing", "legendFormat": "writing" },
+        { "expr": "nginx_connections_waiting", "legendFormat": "waiting" }
+      ],
+      "gridPos": { "x": 0, "y": 25, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests / s by Upstream",
+      "targets": [
+        {
+          "expr": "sum by (upstream) (rate(nginx_upstream_requests_total[1m]))",
+          "legendFormat": "{{upstream}}"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 25, "w": 12, "h": 6 }
+    }
+
+  ]
+}
