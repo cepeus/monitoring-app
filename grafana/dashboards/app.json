@@ -65,6 +65,6 @@
   "time": {"from": "now-5m","to": "now"},
   "timepicker": {},
   "timezone": "browser",
-  "title": "Request Dashboard",
+  "title": "App Dashboard",
   "uid": "monitoring-metrics"
 }
