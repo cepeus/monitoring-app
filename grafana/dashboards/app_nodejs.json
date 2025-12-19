@@ -63,7 +63,7 @@
       "type": "timeseries",
       "title": "HTTP Requests /s by route",
       "targets": [
-        { "expr": "sum by (route) (rate(http_request_duration_seconds_count[1m]))", "legendFormat": "{{route}}", "refId": "H" }
+        { "expr": "sum by (route) (rate(http_request_duration_seconds_count{route!~\"^/(_next|_reat)\"}[1m]))", "legendFormat": "{{route}}", "refId": "H" }
       ],
       "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 }
     },
@@ -71,7 +71,7 @@
       "type": "timeseries",
       "title": "HTTP p95 per route (5m)",
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket[5m])))", "legendFormat": "p95 {{route}}", "refId": "I" }
+        { "expr": "histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket{route!~\"^/(_next|_reat)\"}[5m])))", "legendFormat": "p95 {{route}}", "refId": "I" }
       ],
       "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 }
     }
@@ -86,4 +86,3 @@
   "title": "App (Node.js) Overview",
   "version": 1
 }
-
