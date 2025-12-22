@@ -38,8 +38,6 @@ scrape_configs:
       - files:
           - /etc/prometheus/file_sd/node_exporter_targets.yml
     relabel_configs:
-      # Переписываем label `instance` в значение scrape target (host:port),
-      # чтобы dashboards могли использовать label_values(up{job="node_exporter"}, instance)
       - source_labels: [__address__]
         regex: "(.*)"
         target_label: instance

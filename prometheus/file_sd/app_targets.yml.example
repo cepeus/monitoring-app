@@ -1,0 +1,4 @@
+- targets:
+  - "app:3000"
+  labels:
+    job: "monitoring-app"
