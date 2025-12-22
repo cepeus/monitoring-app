@@ -76,7 +76,7 @@
       "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 }
     }
   ],
-  "refresh": "5s",
+  "refresh": "15s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["app","nodejs"],

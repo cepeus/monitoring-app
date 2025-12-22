@@ -57,7 +57,7 @@
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 6 }
     }
   ],
-  "refresh": "5s",
+  "refresh": "15s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["monitoring"],

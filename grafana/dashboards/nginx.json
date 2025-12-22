@@ -2,7 +2,7 @@
   "title": "NGINX Overview",
   "schemaVersion": 36,
   "version": 1,
-  "refresh": "5s",
+  "refresh": "15s",
   "time": { "from": "now-1h", "to": "now" },
   "tags": ["nginx", "prometheus", "sre"],
   "panels": [
