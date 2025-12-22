@@ -13,7 +13,7 @@ alerting:
 scrape_configs:
   - job_name: 'monitoring-app'
     static_configs:
-      - targets: ['app:3000']
+      - targets: ['${APP_HOST}']
         labels:
           service: 'monitoring-app'
 
@@ -21,9 +21,11 @@ scrape_configs:
     static_configs:
       - targets: ['prometheus:9090']
 
-  - job_name: 'node'
+  - job_name: 'node_exporter'
     static_configs:
-      - targets: ['node-exporter:9100']
+      - targets: ['${NODE_EXPORTER_HOST}']
+        labels:
+          service: 'node-exporter'
 
   - job_name: 'nginx_exporter'
     metrics_path: /metrics

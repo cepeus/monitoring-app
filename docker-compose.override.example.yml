@@ -10,6 +10,20 @@ services:
     depends_on:
       - app
 
+  node-exporter:
+    image: prom/node-exporter:1.6.1
+    container_name: monitoring_node_exporter
+    ports:
+      - "9100"
+    restart: unless-stopped
+
+  app:
+    depends_on:
+      - app
+      - alertmanager
+      - nginx_exporter
+      - node-exporter
+
   nginx_exporter:
     depends_on:
       - nginx
