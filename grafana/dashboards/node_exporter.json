@@ -87,7 +87,7 @@
         "name": "instance",
         "label": "Instance",
         "datasource": "Prometheus",
-        "query": "label_values(node_cpu_seconds_total, instance)",
+        "query": "label_values(up{job=\"node_exporter\"}, instance)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
