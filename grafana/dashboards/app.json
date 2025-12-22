@@ -1,7 +1,5 @@
 {
-  "annotations": {
-    "list": []
-  },
+  "annotations": { "list": [] },
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
@@ -10,61 +8,90 @@
   "panels": [
     {
       "type": "timeseries",
-      "title": "HTTP Request Duration",
+      "title": "CPU (user+system) seconds/sec",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[1m])) by (le, method, route, status))",
-          "legendFormat": "{{method}} {{route}} {{status}}",
+          "expr": "rate(process_cpu_user_seconds_total{app=~\"$app\",env=~\"$env\"}[1m]) + rate(process_cpu_system_seconds_total{app=~\"$app\",env=~\"$env\"}[1m])",
+          "legendFormat": "{{app}} {{env}}",
           "refId": "A"
         }
       ],
-      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "WS Event Duration",
+      "title": "Memory RSS (bytes)",
       "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(ws_event_duration_seconds_bucket[1m])) by (le, event, direction, result))",
-          "legendFormat": "{{event}} {{direction}} {{result}}",
-          "refId": "A"
-        }
+        { "expr": "process_resident_memory_bytes{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "B" }
       ],
-      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "HTTP Request Count",
+      "title": "Heap Used (bytes)",
       "targets": [
-        {
-          "expr": "sum(rate(http_request_duration_seconds_count[1m])) by (method, route, status)",
-          "legendFormat": "{{method}} {{route}} {{status}}",
-          "refId": "B"
-        }
+        { "expr": "nodejs_heap_used_bytes{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "C" }
       ],
-      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 6 }
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "WS Event Count",
+      "title": "Event Loop Lag (seconds)",
       "targets": [
-        {
-          "expr": "sum(rate(ws_event_duration_seconds_count[1m])) by (event, direction, result)",
-          "legendFormat": "{{event}} {{direction}} {{result}}",
-          "refId": "B"
-        }
+        { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
       ],
-      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 6 }
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Active Handles / Active Requests",
+      "targets": [
+        { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
+        { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
+      ],
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "GC Duration (rate seconds/sec)",
+      "targets": [
+        { "expr": "rate(nodejs_gc_duration_seconds_sum{app=~\"$app\",env=~\"$env\"}[5m])", "legendFormat": "gc_seconds/s", "refId": "G" }
+      ],
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
     }
   ],
-  "refresh": "15s",
+  "refresh": "5s",
   "schemaVersion": 36,
   "style": "dark",
-  "tags": ["monitoring"],
-  "templating": {"list": []},
-  "time": {"from": "now-5m","to": "now"},
+  "tags": ["app","nodejs"],
+  "templating": { "list": [
+    {
+      "type": "query",
+      "name": "app",
+      "label": "App",
+      "datasource": "Prometheus",
+      "query": "label_values(process_resident_memory_bytes, app)",
+      "refresh": 1,
+      "includeAll": true,
+      "multi": true,
+      "allValue": ".*",
+      "sort": 0
+    },
+    {
+      "type": "query",
+      "name": "env",
+      "label": "Env",
+      "datasource": "Prometheus",
+      "query": "label_values(process_resident_memory_bytes, env)",
+      "refresh": 1,
+      "includeAll": true,
+      "multi": true,
+      "allValue": ".*",
+      "sort": 0
+    }
+  ] },
+  "time": { "from": "now-1h","to": "now" },
   "timepicker": {},
-  "timezone": "browser",
-  "title": "App Dashboard",
-  "uid": "monitoring-metrics"
+  "title": "App (Node.js) Overview",
+  "version": 1
 }

@@ -13,9 +13,17 @@ alerting:
 scrape_configs:
   - job_name: 'monitoring-app'
     static_configs:
-      - targets: ['app:3000']
+      - targets: []
         labels:
           service: 'monitoring-app'
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/app_targets.yml
+    relabel_configs:
+      - source_labels: [__address__]
+        regex: "(.*)"
+        target_label: instance
+        replacement: "$1"
 
   - job_name: 'prometheus'
     static_configs:

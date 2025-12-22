@@ -1,0 +1,7 @@
+- targets:
+  - "app:3000"
+  # replace with real host:port values
+  # - "10.114.0.6:3559"
+  labels:
+    job: "monitoring-app"
+
