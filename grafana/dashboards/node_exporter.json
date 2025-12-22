@@ -7,29 +7,16 @@
   "links": [],
   "panels": [
     {
-      "type": "stat",
-      "title": "Exporter State",
-      "targets": [ { "expr": "max(up{job=\"node_exporter\", instance=~\"$instance\"})", "refId": "A" } ],
-      "fieldConfig": {
-        "defaults": {
-          "mappings": [
-            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
-          ]
-        }
-      },
-      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 3 }
-    },
-    {
       "type": "timeseries",
       "title": "CPU Usage (user+system) %",
       "targets": [
         {
           "expr": "100 * (1 - avg by(instance) (rate(node_cpu_seconds_total{mode=\"idle\", instance=~\"$instance\"}[5m])))",
           "legendFormat": "{{instance}}",
-          "refId": "B"
+          "refId": "A"
         }
       ],
-      "gridPos": { "x": 6, "y": 0, "w": 12, "h": 4 }
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
@@ -38,25 +25,58 @@
         {
           "expr": "100 * (1 - (node_memory_MemAvailable_bytes{instance=~\"$instance\"} / node_memory_MemTotal_bytes{instance=~\"$instance\"}))",
           "legendFormat": "{{instance}}",
-          "refId": "C"
+          "refId": "B"
         }
       ],
-      "gridPos": { "x": 0, "y": 3, "w": 12, "h": 4 }
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "Network Traffic (rx/s + tx/s)",
+      "title": "Load (1m)",
+      "targets": [
+        { "expr": "node_load1{instance=~\"$instance\"}", "legendFormat": "{{instance}}", "refId": "C" }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Disk Used % (by mount)",
+      "targets": [
+        {
+          "expr": "100 * (1 - (node_filesystem_avail_bytes{instance=~\"$instance\", mountpoint!~\"^/(sys|proc|dev)($|/)\"} / node_filesystem_size_bytes{instance=~\"$instance\", mountpoint!~\"^/(sys|proc|dev)($|/)\"}))",
+          "legendFormat": "{{instance}} {{mountpoint}}",
+          "refId": "D"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Network Traffic (rx + tx) bytes/s",
       "targets": [
         {
           "expr": "sum by(instance) (rate(node_network_receive_bytes_total{instance=~\"$instance\"}[1m]) + rate(node_network_transmit_bytes_total{instance=~\"$instance\"}[1m]))",
           "legendFormat": "{{instance}}",
-          "refId": "D"
+          "refId": "E"
         }
       ],
-      "gridPos": { "x": 12, "y": 3, "w": 12, "h": 4 }
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "type": "stat",
+      "title": "Exporter State",
+      "targets": [ { "expr": "max(up{job=\"node_exporter\", instance=~\"$instance\"})", "refId": "F" } ],
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "type": "value", "options": { "0": { "text": "DOWN", "color": "red" }, "1": { "text": "UP", "color": "green" } } }
+          ]
+        }
+      },
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
     }
   ],
-  "refresh": "10s",
+  "refresh": "5s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["node_exporter","infrastructure"],
@@ -81,4 +101,3 @@
   "title": "Node Exporter Overview",
   "uid": "node-exporter-overview"
 }
-
