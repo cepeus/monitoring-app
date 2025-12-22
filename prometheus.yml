@@ -13,7 +13,7 @@ alerting:
 scrape_configs:
   - job_name: 'monitoring-app'
     static_configs:
-      - targets: ['${APP_HOST}']
+      - targets: ['app:3000']
         labels:
           service: 'monitoring-app'
 
