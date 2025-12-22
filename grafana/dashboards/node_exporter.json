@@ -65,7 +65,7 @@
     {
       "type": "stat",
       "title": "Exporter State",
-      "targets": [ { "expr": "max(up{job=\"node_exporter\", instance=~\"$instance\"})", "refId": "F" } ],
+      "targets": [ { "expr": "max(up{instance=~\"$instance\"})", "refId": "F" } ],
       "fieldConfig": {
         "defaults": {
           "mappings": [
@@ -87,7 +87,7 @@
         "name": "instance",
         "label": "Instance",
         "datasource": "Prometheus",
-        "query": "label_values(up{job=\"node_exporter\"}, instance)",
+        "query": "label_values(node_cpu_seconds_total, instance)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,

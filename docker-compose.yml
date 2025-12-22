@@ -19,6 +19,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
+      - ./prometheus/file_sd:/etc/prometheus/file_sd:ro
     ports:
       - "9090:9090"
     restart: unless-stopped
