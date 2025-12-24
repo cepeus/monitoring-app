@@ -1,0 +1,88 @@
+sources:
+  nginx:
+    type: file
+    include:
+      - /home/zephyr/logs/prometheus/access.log
+    read_from: end
+
+transforms:
+  parse:
+    type: remap
+    inputs: ["nginx"]
+    source: |
+      # Инициализируем переменные, чтобы они существовали в любой ветке
+      parsed = null
+      err = null
+
+      # Приведение .message к строке (обработка возможной ошибки)
+      message_str, m_err = to_string(.message)
+      if m_err != null {
+        # Если .message нельзя привести к строке — сигнализируем об ошибке парсинга
+        parsed = null
+        err = m_err
+      } else {
+        # Обрабатываем fallible вызов parse_regex: получаем parsed и err
+        parsed, err = parse_regex(
+          message_str,
+          r'^(?P<method>\S+) (?P<url>\S+) (?P<status>\d+) (?P<request_time>[\d.]+)$'
+        )
+      }
+
+      # Если парсинг успешен — применяем поля и выставляем count=1.
+      # Иначе — помечаем parse_error и выставляем count=0 (чтобы поле всегда существовало).
+      if err == null && parsed != null {
+        . = parsed
+        .status = to_int!(.status)
+        .request_time = to_float!(.request_time)
+        .count = 1
+
+        # Нормализация url (уменьшение cardinality)
+        route = to_string(.url)
+
+        # 1) Убираем query string
+        route = replace(route, "\\?.*$", "")
+
+        # 2) Маскируем UUID-like сегменты
+        route = replace(route, "/[0-9a-fA-F]{8}-[0-9a-fA-F-]{36}", "/:uuid")
+
+        # 3) Маскируем длинные алфавитно-цифровые сегменты (вероятные id / tokens)
+        route = replace(route, "/[A-Za-z0-9_-]{6,}", "/:id")
+
+        # 4) Пустой путь -> '/'
+        if route == "" {
+          route = "/"
+        }
+
+        .url = route
+      } else {
+        .parse_error = true
+        .count = 0
+        .url = "/_invalid_"
+      }
+
+  prometheus_metrics:
+    type: log_to_metric
+    inputs: ["parse"]
+    metrics:
+      - type: counter
+        name: http_response_total
+        field: count
+        tags:
+          status: "{{status}}"
+      - type: counter
+        name: http_requests_total
+        field: count
+        tags:
+          url: "{{url}}"
+      - type: histogram
+        name: http_request_duration_seconds
+        field: request_time
+        tags:
+          url: "{{url}}"
+
+sinks:
+  prometheus:
+    type: prometheus_exporter
+    inputs: ["prometheus_metrics"]
+    address: "0.0.0.0:9598"
+    namespace: "nginx"

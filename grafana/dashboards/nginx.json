@@ -1,5 +1,5 @@
 {
-  "title": "NGINX Overview",
+  "title": "NGINX Overview 2",
   "schemaVersion": 36,
   "version": 1,
   "refresh": "15s",
@@ -57,26 +57,22 @@
     },
     {
       "type": "stat",
-      "title": "Requests (24h)",
-      "description": "Суммы по статусам 2xx/3xx/4xx/5xx за 24 часа",
+      "title": "4xx (24h)",
+      "description": "Количество ответов с кодами 4xx за последние 24 часа",
       "targets": [
-        { "expr": "sum(increase(http_request_duration_seconds_count{status=~\"2..\"}[24h]))", "legendFormat": "2xx" },
-        { "expr": "sum(increase(http_request_duration_seconds_count{status=~\"3..\"}[24h]))", "legendFormat": "3xx" },
-        { "expr": "sum(increase(http_request_duration_seconds_count{status=~\"4..\"}[24h]))", "legendFormat": "4xx" },
-        { "expr": "sum(increase(http_request_duration_seconds_count{status=~\"5..\"}[24h]))", "legendFormat": "5xx" }
+        { "expr": "sum(increase(nginx_http_response_total{status=~\"4..\"}[24h]))", "legendFormat": "4xx" }
       ],
-      "options": {
-        "reduceOptions": { "calcs": ["lastNotNull"] },
-        "graphMode": "none",
-        "colorMode": "value",
-        "orientation": "auto",
-        "justifyMode": "center"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }
-        }
-      },
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "graphMode": "none" },
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 3 }
+    },
+    {
+      "type": "stat",
+      "title": "5xx (24h)",
+      "description": "Количество ответов с кодами 5xx за последние 24 часа",
+      "targets": [
+        { "expr": "sum(increase(nginx_http_response_total{status=~\"5..\"}[24h]))", "legendFormat": "5xx" }
+      ],
+      "options": { "reduceOptions": { "calcs": ["sum"] }, "graphMode": "none" },
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 3 }
     },
 
@@ -103,6 +99,54 @@
       ],
       "description": "Количество подключений nginx: reading / writing / waiting",
       "gridPos": { "x": 12, "y": 3, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests by status (rate)",
+      "targets": [
+        {
+          "expr": "sum by (status) (rate(nginx_http_response_total[5m]))",
+          "legendFormat": "{{status}}"
+        }
+      ],
+      "description": "Rate of requests grouped by HTTP status",
+      "gridPos": { "x": 0, "y": 9, "w": 12, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Top routes by RPS",
+      "targets": [
+        {
+          "expr": "topk(10, sum by (url) (rate(nginx_http_requests_total[1m])))",
+          "legendFormat": "{{url}}"
+        }
+      ],
+      "description": "Top 10 routes by requests per second",
+      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Avg request_time by route",
+      "targets": [
+        {
+          "expr": "sum by (url) (rate(nginx_http_request_duration_seconds_sum[5m])) / sum by (url) (rate(nginx_http_request_duration_seconds_count[5m]))",
+          "legendFormat": "{{url}}"
+        }
+      ],
+      "description": "Average request duration per route (seconds)",
+      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 latency by route",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, url) (rate(nginx_http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "{{url}}"
+        }
+      ],
+      "description": "95th percentile latency per route",
+      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 5 }
     }
 
   ]
