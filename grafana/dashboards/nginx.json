@@ -1,5 +1,5 @@
 {
-  "title": "NGINX Overview 2",
+  "title": "NGINX Overview",
   "schemaVersion": 36,
   "version": 1,
   "refresh": "15s",
@@ -103,19 +103,6 @@
       ],
       "description": "Количество подключений nginx: reading / writing / waiting",
       "gridPos": { "x": 12, "y": 3, "w": 12, "h": 6 }
-    },
-
-    {
-      "type": "timeseries",
-      "title": "RPS by Endpoint (Top 10, App)",
-      "targets": [
-        {
-          "expr": "topk(10, sum by (route) (rate(http_request_duration_seconds_count{route!~\"^/(_next|_react)(/.*)?\"}[1m])))",
-          "legendFormat": "{{route}}"
-        }
-      ],
-      "description": "Частота запросов по эндпоинтам приложения (Top 10), исключая _next/_react",
-      "gridPos": { "x": 0, "y": 9, "w": 12, "h": 6 }
     }
 
   ]
