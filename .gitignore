@@ -3,3 +3,4 @@
 docker-compose.override.yml
 prometheus/file_sd/node_exporter_targets.yml
 prometheus/file_sd/app_targets.yml
+prometheus/file_sd/vector_targets.yml
