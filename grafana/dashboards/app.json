@@ -9,9 +9,10 @@
     {
       "type": "timeseries",
       "title": "CPU (user+system) seconds/sec",
+      "description": "Сумма user+system CPU в секунду. Можно фильтровать по App / Env / Instance.",
       "targets": [
         {
-          "expr": "rate(process_cpu_user_seconds_total{app=~\"$app\",env=~\"$env\"}[1m]) + rate(process_cpu_system_seconds_total{app=~\"$app\",env=~\"$env\"}[1m])",
+          "expr": "rate(process_cpu_user_seconds_total{job=\"monitoring-app\",app=~\"$app\",env=~\"$env\",instance=~\"$instance\"}[1m]) + rate(process_cpu_system_seconds_total{job=\"monitoring-app\",app=~\"$app\",env=~\"$env\",instance=~\"$instance\"}[1m])",
           "legendFormat": "{{app}} {{env}}",
           "refId": "A"
         }
@@ -20,23 +21,28 @@
     },
     {
       "type": "timeseries",
-      "title": "Memory RSS (bytes)",
+      "title": "Memory RSS (MB)",
+      "description": "Объём resident memory (RSS) процесса в мегабайтах. Исключает метрики других job (например, Prometheus).",
+      "fieldConfig": { "defaults": { "unit": "megabytes", "decimals": 2 } },
       "targets": [
-        { "expr": "process_resident_memory_bytes{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "B" }
+        { "expr": "process_resident_memory_bytes{job=\"monitoring-app\",app=~\"$app\",env=~\"$env\",instance=~\"$instance\"} / 1024 / 1024", "legendFormat": "{{instance}} {{app}} {{env}}", "refId": "B" }
       ],
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "Heap Used (bytes)",
+      "title": "Active Handles / Active Requests",
+      "description": "Количество активных дескрипторов и активных запросов в Node.js (handles / requests).",
       "targets": [
-        { "expr": "nodejs_heap_used_bytes{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "C" }
+        { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
+        { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
       ],
       "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
       "title": "Event Loop Lag (seconds)",
+      "description": "Задержка event loop в секундах — показатель блокировок/задержек в приложении.",
       "targets": [
         { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
       ],
@@ -44,54 +50,195 @@
     },
     {
       "type": "timeseries",
-      "title": "Active Handles / Active Requests",
+      "title": "GC Duration (rate seconds/sec)",
+      "description": "Время, затраченное сборщиком мусора (rate по сумме за 5м).",
       "targets": [
-        { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
-        { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
+        { "expr": "rate(nodejs_gc_duration_seconds_sum{app=~\"$app\",env=~\"$env\"}[5m])", "legendFormat": "gc_seconds/s", "refId": "G" }
       ],
       "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "GC Duration (rate seconds/sec)",
+      "title": "WS Events (service scope)",
+      "description": "Количество WS событий (rate за 5м). Сгруппировано по event/direction/result. Фильтр по Service и Instance доступен в шаблонах.",
       "targets": [
-        { "expr": "rate(nodejs_gc_duration_seconds_sum{app=~\"$app\",env=~\"$env\"}[5m])", "legendFormat": "gc_seconds/s", "refId": "G" }
+        {
+          "expr": "sum by(event,direction,result) (rate(ws_event_duration_seconds_count{service=~\"$service\",instance=~\"$instance\"}[5m]))",
+          "legendFormat": "{{event}} {{direction}} {{result}}",
+          "refId": "I"
+        }
       ],
       "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "WS Event Duration",
+      "description": "95-й перцентиль длительности обработки WebSocket-событий. NaN означает отсутствие данных для комбинации меток. Фильтрация по Service и Instance.",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ws_event_duration_seconds_bucket{service=~\"$service\",instance=~\"$instance\"}[5m])) by (le, event, direction, result))",
+          "legendFormat": "p95 {{event}} {{direction}} {{result}}",
+          "refId": "A"
+        },
+        {
+           "legendFormat": "avg {{instance}} {{event}} {{direction}} {{result}}",
+           "refId": "B"
+         }
+      ],
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "WS Event Count",
+      "description": "Средняя длительность WS‑событий (сек) по комбинациям; показываются только положительные значения.",
+      "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 1 } },
+      "targets": [
+        {
+          "expr": "clamp_min(sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\"}[5m])) / sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\"}[5m])), 0)",
+          "legendFormat": "{{event}} {{direction}} {{result}} {{instance}}",
+          "refId": "B"
+        }
+       ],
+       "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 }
+     },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Duration",
+      "description": "95-й перцентиль длительности HTTP-запросов (histogram_quantile по bucket). Панели с HTTP могут быть пустыми, поэтому помещены в конец дашборда.",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{app=~\"$app\",env=~\"$env\"}[1m])) by (le, method, route, status))",
+          "legendFormat": "{{method}} {{route}} {{status}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Count",
+      "description": "Скорость HTTP-запросов (count) — полезно для отладки, помещена в низ дашборда.",
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_seconds_count{app=~\"$app\",env=~\"$env\"}[1m])) by (method, route, status)",
+          "legendFormat": "{{method}} {{route}} {{status}}",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 6 }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "4xx by Code",
+      "targets": [
+        { "expr": "round(sum by(status) (increase(http_request_duration_seconds_count{status=~\"4..\"}[1m])))", "legendFormat": "{{status}}" }
+      ],
+      "description": "Количество запросов по статусам 4xx за последнюю минуту (requests per 1m)",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "5xx by Code",
+      "targets": [
+        { "expr": "round(sum by(status) (increase(http_request_duration_seconds_count{status=~\"5..\"}[1m])))", "legendFormat": "{{status}}" }
+      ],
+      "description": "Количество запросов по статусам 5xx за последнюю минуту (requests per 1m)",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 5 }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Estimated Concurrency (Little’s Law)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_seconds_count[5m])) * histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket[5m])))",
+          "legendFormat": "concurrency~"
+        }
+      ],
+      "description": "Приблизительная оценка конкуренции запросов по формуле Little’s Law",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Latency p95 by Endpoint (Top 5)",
+      "targets": [
+        {
+          "expr": "topk(5, histogram_quantile(0.95, sum by (le, route) (rate(http_request_duration_seconds_bucket{route!~\"^/(_next|_react)(/.*)?\"}[5m]))))",
+          "legendFormat": "{{route}}"
+        }
+      ],
+      "description": "p95 latency по эндпоинтам (Top 5)",
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 6 }
+    },
+    {
+      "type": "heatmap",
+      "title": "Latency Heatmap (App)",
+      "targets": [ { "expr": "sum by (le) (rate(http_request_duration_seconds_bucket[5m]))" } ],
+      "description": "Тепловая карта распределения задержек приложения (bucket-интервалы)",
+      "gridPos": { "x": 0, "y": 44, "w": 24, "h": 6 }
     }
   ],
-  "refresh": "5s",
+  "refresh": "15s",
   "schemaVersion": 36,
   "style": "dark",
   "tags": ["app","nodejs"],
-  "templating": { "list": [
-    {
-      "type": "query",
-      "name": "app",
-      "label": "App",
-      "datasource": "Prometheus",
-      "query": "label_values(process_resident_memory_bytes, app)",
-      "refresh": 1,
-      "includeAll": true,
-      "multi": true,
-      "allValue": ".*",
-      "sort": 0
-    },
-    {
-      "type": "query",
-      "name": "env",
-      "label": "Env",
-      "datasource": "Prometheus",
-      "query": "label_values(process_resident_memory_bytes, env)",
-      "refresh": 1,
-      "includeAll": true,
-      "multi": true,
-      "allValue": ".*",
-      "sort": 0
-    }
-  ] },
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "app",
+        "label": "App",
+        "datasource": "Prometheus",
+        "query": "label_values(process_resident_memory_bytes{job=\"monitoring-app\"}, app)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "sort": 0
+      },
+      {
+        "type": "query",
+        "name": "env",
+        "label": "Env",
+        "datasource": "Prometheus",
+        "query": "label_values(process_resident_memory_bytes{job=\"monitoring-app\"}, env)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "sort": 0
+      },
+      {
+        "type": "query",
+        "name": "service",
+        "label": "Service",
+        "datasource": "Prometheus",
+        "query": "label_values(ws_event_duration_seconds_count, service)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "sort": 0
+      },
+      {
+        "type": "query",
+        "name": "instance",
+        "label": "Instance",
+        "datasource": "Prometheus",
+        "query": "label_values(ws_event_duration_seconds_count{job=\"monitoring-app\"}, instance)",
+        "refresh": 1,
+        "includeAll": true,
+        "multi": true,
+        "allValue": ".*",
+        "sort": 0
+      }
+    ]
+  },
   "time": { "from": "now-1h","to": "now" },
   "timepicker": {},
-  "title": "App (Node.js) Overview",
+  "title": "Application Overview",
   "version": 1
 }

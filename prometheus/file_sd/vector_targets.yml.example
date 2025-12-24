@@ -1,0 +1,4 @@
+- targets:
+  - "localhost:9598"
+  labels:
+    job: "vector_exporter"

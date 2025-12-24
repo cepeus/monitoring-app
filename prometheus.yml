@@ -49,3 +49,19 @@ scrape_configs:
       - targets: ['nginx_exporter:9113']
         labels:
           service: 'nginx'
+
+  - job_name: 'vector_exporter'
+    metrics_path: /metrics
+    static_configs:
+      - targets: []
+        labels:
+          service: 'nginx'
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/file_sd/vector_targets.yml
+    relabel_configs:
+      - source_labels: [ __address__ ]
+        regex: "(.*)"
+        target_label: instance
+        replacement: "$1"
+
