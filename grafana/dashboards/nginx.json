@@ -57,26 +57,28 @@
     },
     {
       "type": "stat",
-      "title": "4xx (24h)",
-      "description": "Количество ответов с кодами 4xx за последние 24 часа",
+      "title": "Requests (24h)",
+      "description": "Суммы по статусам 2xx/3xx/4xx/5xx за 24 часа",
       "targets": [
-        { "expr": "sum(increase(nginx_http_response_total{status=~\"4..\"}[24h]))", "legendFormat": "4xx" }
-      ],
-      "options": { "reduceOptions": { "calcs": ["sum"] }, "graphMode": "none" },
-      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 3 }
-    },
-    {
-      "type": "stat",
-      "title": "5xx (24h)",
-      "description": "Количество ответов с кодами 5xx за последние 24 часа",
-      "targets": [
+        { "expr": "sum(increase(nginx_http_response_total{status=~\"2..\"}[24h]))", "legendFormat": "2xx" },
+        { "expr": "sum(increase(nginx_http_response_total{status=~\"3..\"}[24h]))", "legendFormat": "3xx" },
+        { "expr": "sum(increase(nginx_http_response_total{status=~\"4..\"}[24h]))", "legendFormat": "4xx" },
         { "expr": "sum(increase(nginx_http_response_total{status=~\"5..\"}[24h]))", "legendFormat": "5xx" }
       ],
-      "options": { "reduceOptions": { "calcs": ["sum"] }, "graphMode": "none" },
+      "options": {
+        "reduceOptions": { "calcs": ["lastNotNull"] },
+        "graphMode": "none",
+        "colorMode": "value",
+        "orientation": "auto",
+        "justifyMode": "center"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [ { "color": "green", "value": null } ] }
+        }
+      },
       "gridPos": { "x": 18, "y": 0, "w": 6, "h": 3 }
     },
-
-
     {
       "type": "timeseries",
       "title": "RPS (Ingress)",
@@ -102,51 +104,59 @@
     },
     {
       "type": "timeseries",
-      "title": "Requests by status (rate)",
+      "title": "4xx by Code",
       "targets": [
-        {
-          "expr": "sum by (status) (rate(nginx_http_response_total[5m]))",
-          "legendFormat": "{{status}}"
-        }
+        { "expr": "round(sum by(status) (increase(nginx_http_response_total{status=~\"4..\"}[1m])))", "legendFormat": "{{status}}" }
       ],
-      "description": "Rate of requests grouped by HTTP status",
+      "description": "Количество запросов по статусам 4xx за последнюю минуту (requests per 1m)",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
       "gridPos": { "x": 0, "y": 9, "w": 12, "h": 5 }
+    },
+    {
+      "type": "timeseries",
+      "title": "5xx by Code",
+      "targets": [
+        { "expr": "round(sum by(status) (increase(nginx_http_response_total{status=~\"5..\"}[1m])))", "legendFormat": "{{status}}" }
+      ],
+      "description": "Количество запросов по статусам 5xx за последнюю минуту (requests per 1m)",
+      "fieldConfig": { "defaults": { "unit": "short", "decimals": 0 } },
+      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 5 }
     },
     {
       "type": "timeseries",
       "title": "Top routes by RPS",
       "targets": [
         {
-          "expr": "topk(10, sum by (url) (rate(nginx_http_requests_total[1m])))",
+          "expr": "topk(10, sum by (url) (rate(nginx_http_requests_total{url!~\"^/ws/|/event\"}[1m])))",
           "legendFormat": "{{url}}"
         }
       ],
       "description": "Top 10 routes by requests per second",
-      "gridPos": { "x": 12, "y": 9, "w": 12, "h": 5 }
+      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 5 }
     },
     {
       "type": "timeseries",
       "title": "Avg request_time by route",
       "targets": [
         {
-          "expr": "sum by (url) (rate(nginx_http_request_duration_seconds_sum[5m])) / sum by (url) (rate(nginx_http_request_duration_seconds_count[5m]))",
+          "expr": "sum by (url) (rate(nginx_http_request_duration_seconds_sum{url!~\"^/ws/|/event\"}[5m])) / sum by (url) (rate(nginx_http_request_duration_seconds_count{url!~\"^/ws/|/event\"}[5m]))",
           "legendFormat": "{{url}}"
         }
       ],
       "description": "Average request duration per route (seconds)",
-      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 5 }
+      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 5 }
     },
     {
       "type": "timeseries",
       "title": "p95 latency by route",
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum by (le, url) (rate(nginx_http_request_duration_seconds_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, url) (rate(nginx_http_request_duration_seconds_bucket{url!~\"^/ws/|/event\"}[5m])))",
           "legendFormat": "{{url}}"
         }
       ],
       "description": "95th percentile latency per route",
-      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 5 }
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 5 }
     }
 
   ]
