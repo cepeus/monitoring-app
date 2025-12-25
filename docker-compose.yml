@@ -67,38 +67,5 @@ services:
     depends_on:
       - prometheus
 
-  opensearch:
-    image: opensearchproject/opensearch:2.8.0
-    container_name: monitoring_opensearch
-    environment:
-      - discovery.type=single-node
-      - bootstrap.memory_lock=true
-      - "OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m"
-      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    volumes:
-      - opensearch-storage:/usr/share/opensearch/data
-    ports:
-      - "9200:9200"
-      - "9600:9600"
-    restart: unless-stopped
-    depends_on:
-      - app
-
-  opensearch-dashboards:
-    image: opensearchproject/opensearch-dashboards:2.8.0
-    container_name: monitoring_opensearch_dashboards
-    ports:
-      - "5601:5601"
-    environment:
-      - OPENSEARCH_HOSTS=http://opensearch:9200
-    restart: unless-stopped
-    depends_on:
-      - opensearch
-
 volumes:
   grafana-storage:
-  opensearch-storage:
