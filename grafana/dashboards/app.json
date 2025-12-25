@@ -29,67 +29,22 @@
       ],
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
     },
+
     {
       "type": "timeseries",
-      "title": "Active Handles / Active Requests",
-      "description": "Количество активных дескрипторов и активных запросов в Node.js (handles / requests).",
-      "targets": [
-        { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
-        { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
-      ],
-      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 6 }
-    },
-    {
-      "type": "timeseries",
-      "title": "Event Loop Lag (seconds)",
-      "description": "Задержка event loop в секундах — показатель блокировок/задержек в приложении.",
-      "targets": [
-        { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
-      ],
-      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 6 }
-    },
-    {
-      "type": "timeseries",
-      "title": "GC Duration (rate seconds/sec)",
-      "description": "Время, затраченное сборщиком мусора (rate по сумме за 5м).",
-      "targets": [
-        { "expr": "rate(nodejs_gc_duration_seconds_sum{app=~\"$app\",env=~\"$env\"}[5m])", "legendFormat": "gc_seconds/s", "refId": "G" }
-      ],
-      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
-    },
-    {
-      "type": "timeseries",
-      "title": "WS Events (service scope)",
-      "description": "Количество WS событий (rate за 5м). Сгруппировано по event/direction/result. Фильтр по Service и Instance доступен в шаблонах.",
+      "title": "WS Event Duration (action:Spin)",
       "targets": [
         {
-          "expr": "sum by(event,direction,result) (rate(ws_event_duration_seconds_count{service=~\"$service\",instance=~\"$instance\"}[5m]))",
+          "expr": "sum(increase(ws_event_duration_seconds_count{service=~\"$service\",instance=~\"$instance\",event=\"action:Spin\"}[1m]))",
           "legendFormat": "{{event}} {{direction}} {{result}}",
           "refId": "I"
         }
       ],
-      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 }
     },
     {
       "type": "timeseries",
       "title": "WS Event Duration",
-      "description": "95-й перцентиль длительности обработки WebSocket-событий. NaN означает отсутствие данных для комбинации меток. Фильтрация по Service и Instance.",
-      "targets": [
-        {
-          "expr": "histogram_quantile(0.95, sum(rate(ws_event_duration_seconds_bucket{service=~\"$service\",instance=~\"$instance\"}[5m])) by (le, event, direction, result))",
-          "legendFormat": "p95 {{event}} {{direction}} {{result}}",
-          "refId": "A"
-        },
-        {
-           "legendFormat": "avg {{instance}} {{event}} {{direction}} {{result}}",
-           "refId": "B"
-         }
-      ],
-      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 8 }
-    },
-    {
-      "type": "timeseries",
-      "title": "WS Event Count",
       "description": "Средняя длительность WS‑событий (сек) по комбинациям; показываются только положительные значения.",
       "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 1 } },
       "targets": [
@@ -99,8 +54,27 @@
           "refId": "B"
         }
        ],
-       "gridPos": { "x": 12, "y": 18, "w": 12, "h": 8 }
-     }
+       "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 }
+     },
+    {
+      "type": "timeseries",
+      "title": "Active Handles / Active Requests",
+      "description": "Количество активных дескрипторов и активных запросов в Node.js (handles / requests).",
+      "targets": [
+        { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
+        { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
+      ],
+      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event Loop Lag (seconds)",
+      "description": "Задержка event loop в секундах — показатель блокировок/задержек в приложении.",
+      "targets": [
+        { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
+      ],
+      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 6 }
+    }
   ],
   "refresh": "15s",
   "schemaVersion": 36,
