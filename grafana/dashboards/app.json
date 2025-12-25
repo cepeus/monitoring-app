@@ -29,18 +29,22 @@
       ],
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
     },
-
     {
       "type": "timeseries",
-      "title": "WS Event Duration (action:Spin)",
+      "title": "Event count - action:Spin, action:auth",
       "targets": [
         {
-          "expr": "sum(increase(ws_event_duration_seconds_count{service=~\"$service\",instance=~\"$instance\",event=\"action:Spin\"}[1m]))",
+          "expr": "sum(increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\"}[1m]))",
           "legendFormat": "{{event}} {{direction}} {{result}}",
-          "refId": "I"
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:auth\"}[1m]))",
+          "legendFormat": "{{event}} {{direction}} {{result}}",
+          "refId": "B"
         }
       ],
-      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 }
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
     },
     {
       "type": "timeseries",
@@ -54,7 +58,7 @@
           "refId": "B"
         }
        ],
-       "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 }
+       "gridPos": { "x": 12, "y": 12, "w": 24, "h": 8 }
      },
     {
       "type": "timeseries",
@@ -64,7 +68,7 @@
         { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "handles", "refId": "E" },
         { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"$env\"}", "legendFormat": "requests", "refId": "F" }
       ],
-      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 6 }
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
@@ -73,7 +77,7 @@
       "targets": [
         { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"$env\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
       ],
-      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 6 }
+      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 6 }
     }
   ],
   "refresh": "15s",
