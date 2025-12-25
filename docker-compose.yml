@@ -80,7 +80,7 @@ services:
         soft: -1
         hard: -1
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - opensearch-storage:/usr/share/opensearch/data
     ports:
       - "9200:9200"
       - "9600:9600"
@@ -101,4 +101,4 @@ services:
 
 volumes:
   grafana-storage:
-  opensearch-data:
+  opensearch-storage:
