@@ -34,12 +34,12 @@
       "title": "Event count - action:Spin, action:auth",
       "targets": [
         {
-          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\"}[5m]))",
+          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "A"
         },
         {
-          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\"}[5m]))",
+          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "B"
         }
@@ -53,9 +53,9 @@
       "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 1 } },
       "targets": [
         {
-          "expr": "clamp_min(sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\"}[5m])) / sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\"}[5m])), 0)",
-          "legendFormat": "{{event}} {{direction}} {{result}} {{instance}}",
-          "refId": "B"
+          "expr": "clamp_min(sum by (event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m])) / sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m])), 0)",
+          "legendFormat": "{{event}} {{direction}}",
+          "refId": "A"
         }
        ],
        "gridPos": { "x": 12, "y": 12, "w": 24, "h": 8 }
