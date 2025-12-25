@@ -50,10 +50,10 @@
       "type": "timeseries",
       "title": "WS Event Duration",
       "description": "Средняя длительность WS‑событий (сек) по комбинациям; показываются только положительные значения.",
-      "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 1 } },
+      "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 2 } },
       "targets": [
         {
-          "expr": "clamp_min(sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m])) / sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m])), 0)",
+          "expr": "clamp_min((sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m])) / sum by (instance,event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"$env\",result=\"ok\"}[5m]))/1000), 0)",
           "legendFormat": "{{event}} {{direction}}",
           "refId": "A"
         }
