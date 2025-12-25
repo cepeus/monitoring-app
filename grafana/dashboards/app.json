@@ -34,12 +34,12 @@
       "title": "Event count - action:Spin, action:auth",
       "targets": [
         {
-          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\"}[1m]))",
+          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "A"
         },
         {
-          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\"}[1m]))",
+          "expr": "sum by (service,instance,event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "B"
         }
