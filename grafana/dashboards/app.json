@@ -31,15 +31,32 @@
     },
     {
       "type": "timeseries",
-      "title": "Event count [5m]",
+      "title": "Event count [5m] (spin, auth)",
       "targets": [
         {
-          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\",env=~\"production\"}[5m]))",
+          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\",env=~\"production\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "A"
         },
         {
-          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\",env=~\"production\"}[5m]))",
+          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\",env=~\"production\"}[5m]))",
+          "legendFormat": "{{event}} {{service}} {{instance}}",
+          "refId": "B"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event count [5m]",
+      "targets": [
+        {
+          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
+          "legendFormat": "{{event}} {{service}} {{instance}}",
+          "refId": "A"
+        },
+        {
+          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
           "legendFormat": "{{event}} {{service}} {{instance}}",
           "refId": "B"
         }
@@ -53,7 +70,7 @@
       "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 2 } },
       "targets": [
         {
-          "expr": "clamp_min((sum by (event,direction,result) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) / sum by (event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m]))/1000), 0)",
+          "expr": "clamp_min((sum by (event,direction,result) (rate(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) / sum by (event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m]))/1000), 0)",
           "legendFormat": "{{event}} {{direction}}",
           "refId": "A"
         }
@@ -103,7 +120,7 @@
         "name": "service",
         "label": "Service",
         "datasource": "Prometheus",
-        "query": "label_values(ws_event_duration_seconds_count, service)",
+        "query": "label_values(game_event_duration_seconds_count, service)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
@@ -115,7 +132,7 @@
         "name": "instance",
         "label": "Instance",
         "datasource": "Prometheus",
-        "query": "label_values(ws_event_duration_seconds_count{job=\"monitoring-app\"}, instance)",
+        "query": "label_values(game_event_duration_seconds_count{job=\"monitoring-app\"}, instance)",
         "refresh": 1,
         "includeAll": true,
         "multi": true,
