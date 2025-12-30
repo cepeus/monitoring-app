@@ -31,16 +31,16 @@
     },
     {
       "type": "timeseries",
-      "title": "Event count [5m] (spin, auth)",
+      "title": "Event count [5m] (spin, auth, transaction)",
       "targets": [
         {
-          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\",env=~\"production\"}[5m]))",
-          "legendFormat": "{{event}} {{service}} {{instance}}",
+          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\",env=~\"production\"}[5m]))",
+          "legendFormat": "{{event}} {{service}}",
           "refId": "A"
         },
         {
-          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\",env=~\"production\"}[5m]))",
-          "legendFormat": "{{event}} {{service}} {{instance}}",
+          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"auth\",env=~\"production\"}[5m]))",
+          "legendFormat": "{{event}} {{service}}",
           "refId": "B"
         }
       ],
@@ -52,13 +52,8 @@
       "targets": [
         {
           "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
-          "legendFormat": "{{event}} {{service}} {{instance}}",
+          "legendFormat": "{{event}} {{service}}",
           "refId": "A"
-        },
-        {
-          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
-          "legendFormat": "{{event}} {{service}} {{instance}}",
-          "refId": "B"
         }
       ],
       "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
