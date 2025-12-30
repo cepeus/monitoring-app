@@ -48,10 +48,22 @@
     },
     {
       "type": "timeseries",
-      "title": "Event count [5m]",
+      "title": "Event count (success) [5m]",
       "targets": [
         {
-          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
+          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"ok\"}[5m]))",
+          "legendFormat": "{{event}} {{service}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Event count (error) [5m]",
+      "targets": [
+        {
+          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"error\"}[5m]))",
           "legendFormat": "{{event}} {{service}}",
           "refId": "A"
         }
