@@ -51,7 +51,7 @@
       "title": "Event count [5m]",
       "targets": [
         {
-          "expr": "sum by (event, instance) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
+          "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\"}[5m]))",
           "legendFormat": "{{event}} {{service}}",
           "refId": "A"
         }
