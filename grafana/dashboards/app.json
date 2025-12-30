@@ -31,7 +31,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Event count [5m] (spin, auth, transaction)",
+      "title": "Event count [5m] (spin, auth)",
       "targets": [
         {
           "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",event=\"action:Spin\",env=~\"production\"}[5m]))",
