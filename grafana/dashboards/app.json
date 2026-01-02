@@ -48,7 +48,7 @@
     },
     {
       "type": "timeseries",
-      "title": "Event count (success) [5m]",
+      "title": "Game event count (success) [5m]",
       "targets": [
         {
           "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"ok\"}[5m]))",
@@ -56,11 +56,23 @@
           "refId": "A"
         }
       ],
-      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
-      "title": "Event count (error) [5m]",
+      "title": "WS event count (success) [5m]",
+      "targets": [
+        {
+          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"ok\"}[5m]))",
+          "legendFormat": "{{event}} {{service}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Game event count (error) [5m]",
       "targets": [
         {
           "expr": "sum by (event) (increase(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"error\"}[5m]))",
@@ -68,23 +80,47 @@
           "refId": "A"
         }
       ],
-      "gridPos": { "x": 0, "y": 6, "w": 24, "h": 6 }
+      "gridPos": { "x": 0, "y": 18, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "WS event count (error) [5m]",
+      "targets": [
+        {
+          "expr": "sum by (event) (increase(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",env=~\"production\",result=\"error\"}[5m]))",
+          "legendFormat": "{{event}} {{service}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 18, "w": 12, "h": 6 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Game Event Duration",
+      "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 2 } },
+      "targets": [
+        {
+          "expr": "(sum by (event,direction) (rate(game_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) / sum by (event,direction) (rate(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m]))) and sum by (event,direction) (rate(game_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) >= 0",
+          "legendFormat": "{{event}} {{direction}}",
+          "refId": "A"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 24, "w": 12, "h": 8 }
     },
     {
       "type": "timeseries",
       "title": "WS Event Duration",
-      "description": "Средняя длительность WS‑событий (сек) по комбинациям; показываются только положительные значения.",
       "fieldConfig": { "defaults": { "unit": "seconds", "decimals": 2 } },
       "targets": [
         {
-          "expr": "clamp_min((sum by (event,direction,result) (rate(game_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) / sum by (event,direction,result) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m]))/1000), 0)",
+          "expr": "(sum by (event,direction) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) / sum by (event,direction) (rate(ws_event_duration_seconds_count{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m]))) and sum by (event,direction) (rate(ws_event_duration_seconds_sum{job=\"monitoring-app\",service=~\"${service:regex}\",instance=~\"${instance:regex}\",app=~\"$app\",env=~\"production\",result=\"ok\"}[5m])) >= 0",
           "legendFormat": "{{event}} {{direction}}",
           "refId": "A"
         }
        ],
-       "gridPos": { "x": 12, "y": 12, "w": 24, "h": 8 }
+       "gridPos": { "x": 12, "y": 24, "w": 12, "h": 8 }
      },
-    {
+     {
       "type": "timeseries",
       "title": "Active Handles / Active Requests",
       "description": "Количество активных дескрипторов и активных запросов в Node.js (handles / requests).",
@@ -92,7 +128,7 @@
         { "expr": "nodejs_active_handles_total{app=~\"$app\",env=~\"production\"}", "legendFormat": "handles", "refId": "E" },
         { "expr": "nodejs_active_requests_total{app=~\"$app\",env=~\"production\"}", "legendFormat": "requests", "refId": "F" }
       ],
-      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 6 }
+      "gridPos": { "x": 0, "y": 32, "w": 12, "h": 6 }
     },
     {
       "type": "timeseries",
@@ -101,7 +137,7 @@
       "targets": [
         { "expr": "nodejs_eventloop_lag_seconds{app=~\"$app\",env=~\"production\"}", "legendFormat": "{{app}} {{env}}", "refId": "D" }
       ],
-      "gridPos": { "x": 12, "y": 20, "w": 12, "h": 6 }
+      "gridPos": { "x": 12, "y": 32, "w": 12, "h": 6 }
     }
   ],
   "refresh": "15s",
