@@ -32,7 +32,7 @@ services:
       - VIRTUAL_HOST=prometheus.${DOMAIN}
       - VIRTUAL_PORT=9090
     depends_on:
-      - app
+#      - app
       - alertmanager
       - nginx_exporter
     networks:
