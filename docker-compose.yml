@@ -5,13 +5,17 @@ services:
     image: nginx/nginx-prometheus-exporter:0.11.0
     container_name: monitoring_nginx_exporter
     command: ["-nginx.scrape-uri", "${NGINX_SCRAPE_URL}"]
+    networks:
+      services:
 
-  app:
-    build: .
-    container_name: monitoring_app
-    ports:
-      - "3000:3000"
-    restart: unless-stopped
+#  app:
+#    build: .
+#    container_name: monitoring_app
+#    ports:
+#      - "3000:3000"
+#    restart: unless-stopped
+#    networks:
+#      services:
 
   prometheus:
     image: prom/prometheus:v2.47.0
@@ -20,13 +24,19 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - ./alert.rules.yml:/etc/prometheus/alert.rules.yml:ro
       - ./prometheus/file_sd:/etc/prometheus/file_sd:ro
+      - prometheus-data:/prometheus
     ports:
       - "9090:9090"
     restart: unless-stopped
+    environment:
+      - VIRTUAL_HOST=prometheus.${DOMAIN}
+      - VIRTUAL_PORT=9090
     depends_on:
       - app
       - alertmanager
       - nginx_exporter
+    networks:
+      services:
 
   alertmanager:
     image: prom/alertmanager:v0.25.0
@@ -37,8 +47,13 @@ services:
     volumes:
       - ./alertmanager.yml:/etc/alertmanager/config.yml:ro
       - ./alertmanager.yml:/etc/alertmanager/alertmanager.yml:ro
+    environment:
+      - VIRTUAL_HOST=alertmanager.${DOMAIN}
+      - VIRTUAL_PORT=9093
     depends_on:
       - am-telegram
+    networks:
+      services:
 
   am-telegram:
     build: ./tools/am-telegram
@@ -49,6 +64,8 @@ services:
     environment:
       - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    networks:
+      services:
 
   grafana:
     image: grafana/grafana:9.5.0
@@ -64,8 +81,17 @@ services:
       - GF_AUTH_ANONYMOUS_ENABLED=false
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
+      - VIRTUAL_HOST=grafana.${DOMAIN}
+      - VIRTUAL_PORT=3000
     depends_on:
       - prometheus
+    networks:
+      services:
 
 volumes:
   grafana-storage:
+  prometheus-data:
+
+networks:
+  services:
+    external: true
