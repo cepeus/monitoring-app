@@ -1,20 +1,11 @@
 groups:
   - name: monitoring.rules
     rules:
-      - alert: SlowRequest
-        expr: histogram_quantile(0.5, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, method, route, status)) > 0.6
-        for: 1m
-        labels:
-          severity: page
-          team: devops
-        annotations:
-          summary: "Slow requests detected on route {{ $labels.route }}"
-          description: "50th percentile request latency is > 0.6s for route {{ $labels.route }} (method={{ $labels.method }})"
       - alert: High5xxErrorRate
         expr: |
-          sum(rate(http_request_duration_seconds_count{status=~"5.."}[5m]))
+          sum(rate(nginx_http_response_total{status=~"5.."}[5m]))
           /
-          sum(rate(http_request_duration_seconds_count[5m])) > 0.01
+          sum(rate(nginx_http_response_total[5m])) > 0.01
         for: 2m
         labels:
           severity: page
@@ -23,7 +14,7 @@ groups:
           summary: "Рост 5xx ошибок: доля 5xx > 1% за 5m"
           description: "Доля ответов с кодом 5xx за последние 5 минут превысила 1% ({{ $value }}) — проверьте сервисы, внешние зависимости и логи."
       - alert: Spike502504
-        expr: sum(increase(http_request_duration_seconds_count{status=~"502|504"}[1m])) > 10
+        expr: sum(increase(nginx_http_response_total{status=~"502|504"}[1m])) > 10
         for: 1m
         labels:
           severity: page
