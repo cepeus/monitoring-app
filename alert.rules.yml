@@ -5,13 +5,13 @@ groups:
         expr: |
           sum(rate(nginx_http_response_total{status=~"5.."}[5m]))
           /
-          sum(rate(nginx_http_response_total[5m])) > 0.01
+          sum(rate(nginx_http_response_total[5m])) > 0.05
         for: 2m
         labels:
           severity: page
           team: devops
         annotations:
-          summary: "Рост 5xx ошибок: доля 5xx > 1% за 5m"
+          summary: "Рост 5xx ошибок: доля 5xx > 5% за 5m"
           description: "Доля ответов с кодом 5xx за последние 5 минут превысила 1% ({{ $value }}) — проверьте сервисы, внешние зависимости и логи."
       - alert: Spike502504
         expr: sum(increase(nginx_http_response_total{status=~"502|504"}[1m])) > 10
